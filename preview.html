@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Webflow Asset Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #080808;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px;
+}
+#label {
+  color: #363636;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'Inter', monospace;
+  font-weight: 500;
+}
+#wrap { width: min(1200px, 100%); }
+canvas { display: block; width: 100%; height: auto; }
+#dl {
+  background: #146EF5;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  font-family: 'WF Visual Sans', 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+#dl:hover { background: #1560d8; }
+</style>
+</head>
+<body>
+<div id="label">OG / Blog &mdash; 1200&times;630</div>
+<div id="wrap"><canvas id="c"></canvas></div>
+<button id="dl">Download PNG</button>
+<script>
+async function loadFonts() {
+  const faces = [
+    ['WF Visual Sans', 'WFVisualSans-SemiBold.otf', '600'],
+    ['WF Visual Sans', 'WFVisualSans-Medium.otf', '500'],
+    ['WF Visual Sans', 'WFVisualSans-Regular.otf', '400'],
+    ['WF Visual Sans Text', 'WFVisualSans-RegularText.otf', '400'],
+    ['WF Visual Sans Text', 'WFVisualSans-SemiBoldText.otf', '600'],
+  ];
+  await Promise.all(faces.map(([name, file, weight]) => {
+    const face = new FontFace(name, `url(webflow-brand/fonts/OTF/${file})`, { weight });
+    return face.load().then(f => document.fonts.add(f)).catch(() => {});
+  }));
+}
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 1200, H = 630;
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = W * DPR;
+canvas.height = H * DPR;
+ctx.scale(DPR, DPR);
+
+const WF_MARK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABDgAAAKiCAYAAAAzPWyQAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAADh0SURBVHgB7d1dchxXeu/rdxXgEwcEFMEIkyd0Z3gEWx6BoRFYPQKC91siNAISI+giOQCCI2j2CBp7BKZnAN8xGlAEzhY/HNtArl0LHxQokcRXZlVmrueJ6IZalO7sYvJfv1wr3fvpXQ6ARUhp9+Dpne+DKny79WH9ODd/yznWA+hMTpOdX56uPAyqdf/Ruxezz9rNAKjJ7M8WywEAc3DUNA9mP9YDgM7c33r7XW6MG0CFUtqeBAB0rNQbKXngBuhazvHnAKhNSq8OpisKDgC6p94A6N69rV83okkbAVCZ5ZR+Lj8VHAB0Sr0BMCd5ot4AqjN7ztx5M13ZK3+t4ACgU+oNgO7d//HtZs7xXQBUZilNts//WsEBQGfUGwBzMkmPA6AyF+uNwsABQGeOjo9/cC0sQLfO6o31AKjMxXqjMHAA0Jk0SY8CgG6pN4AK/b7eKAwcAHTCN4oA3fNZC9Tq9/VGYeAAoBu+UQTons9aoEKfqzcKAwcArfONIkD3fNYCtfpcvVEYOABon28UAbrnsxao0JfqjcLAAUCrfKMI0D2fsUCtvlRvFAYOANqiXgDols9aoEKfqzcKAwdA7dQbAJ1SbwC1mle9URg4ACqm3gDolnoDqFlu9URh4ADoinkDoFrbYe91YNgAoE7bYeeVegOou94YOAAAsE4/bYeedxcDoCrnnz9vHR4A1GX3a3wE6YQKAAAAABJRU5ErkJggg==';
+
+const WF_MARK_REAL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABDgAAAKiCAYAAAAzPWyQAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAADh0SURBVHgB7d1dchxXeu/rdxXgEwcEFMEIkyd0Z3gEWx6BoRFYPQKC91siNAISI+giOQCCI2j2CBp7BKZnAN8xGlAEzhY/HNtArl0LHxQokcRXZlVmrueJ6IZalO7sYvJfv1wr3fvpXQ6ARUhp9+Dpne+DKny79WH9ODd/yznWA+hMTpOdX56uPAyqdf/Ruxezz9rNAKjJ7M8WywEAc3DUNA9mP9YDgM7c33r7XW6MG0CFUtqeBAB0rNQbKXngBuhazvHnAKhNSq8OpisKDgC6p94A6N69rV83okkbAVCZ5ZR+Lj8VHAB0Sr0BMCd5ot4AqjN7ztx5M13ZK3+t4ACgU+oNgO7d//HtZs7xXQBUZilNts//WsEBQGfUGwBzMkmPA6AyF+uNwsABQGeOjo9/cC0sQLfO6o31AKjMxXqjMHAA0Jk0SY8CgG6pN4AK/b7eKAwcAHTCN4oA3fNZC9Tq9/VGYeAAoBu+UQTons9aoEKfqzcKAwdA7dQbAJ1SbwC1mle9URg4ACqm3gDolnoDqFlu9URh4ADoinkDoFrbYe91YNgAoE7bYeeVegOou94YOAAAsE4/bYeedxcDoCrnnz9vHR4A1GX3a3wE6YQKAAAAABJRU5ErkJggg==';
+
+const SPARK = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMDAwIDIwMDAiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMSBCdWlsZCAxMzYpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogI2Q5Nzc1NzsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTg3MCwxOTAwbDI4LTEyNCwzMi0xNjAsMjYtMTI4LDI0LTE1OCwxNC01Mi0yLTQtMTAsMi0xMjAsMTY0LTE4MiwyNDYtMTQ0LDE1Mi0zNCwxNC02MC0zMCw2LTU2LDM0LTQ4LDE5OC0yNTQsMTIwLTE1OCw3OC05MC0yLTEyaC00bC01MjgsMzQ0LTk0LDEyLTQyLTM4LDYtNjIsMjAtMjAsMTU4LTExMCwzOTQtMjIwLDYtMjAtNi0xMGgtMjBsLTY2LTQtMjI0LTYtMTk0LTgtMTkwLTEwLTQ4LTEwTDAsOTgybDQtMzAsNDAtMjYsNTgsNCwxMjYsMTAsMTkwLDEyLDEzOCw4LDIwNCwyMmgzMmw0LTE0LTEwLTgtOC04LTE5OC0xMzItMjEyLTE0MC0xMTItODItNjAtNDItMzAtMzgtMTItODQsNTQtNjAsNzQsNiwxOCw0LDc0LDU4LDE1OCwxMjIsMjA4LDE1NCwzMCwyNCwxNC04di02bC0xNC0yMi0xMTItMjA0LTEyMC0yMDgtNTQtODYtMTQtNTJjLTUuMy0xOC04LTM4LTgtNjBsNjItODQsMzQtMTIsODQsMTIsMzQsMzAsNTIsMTE4LDgyLDE4NiwxMzAsMjUyLDM4LDc2LDIwLDY4LDgsMjJoMTR2LTEybDEwLTE0NCwyMC0xNzQsMjAtMjI0LDYtNjQsMzItNzYsNjItNDAsNDgsMjIsNDAsNTgtNiwzNi0yMiwxNTQtNDgsMjQyLTMwLDE2NGgxOGwyMC0yMiw4Mi0xMDgsMTM4LTE3Miw2MC02OCw3Mi03Niw0Ni0zNmg4Nmw2Miw5NC0yOCw5OC04OCwxMTItNzQsOTQtMTA2LDE0Mi02NCwxMTQsNiw4aDE0bDIzOC01MiwxMzAtMjIsMTUyLTI2LDcwLDMyLDgsMzItMjgsNjgtMTY0LDQwLTE5MiwzOC0yODYsNjgtNCwyLDQsNiwxMjgsMTIsNTYsNGgxMzZsMjUyLDE4LDY2LDQ0LDM4LDUyLTYsNDItMTAyLDUwLTEzNi0zMi0zMjAtNzYtMTA4LTI2aC0xNnY4bDkyLDkwLDE2NiwxNTAsMjEwLDE5NCwxMCw0OC0yNiw0MC0yOC00LTE4NC0xNDAtNzItNjItMTYwLTEzNGgtMTB2MTRsMzYsNTQsMTk2LDI5NCwxMCw5MC0xNCwyOC01MiwxOC01NC0xMC0xMTYtMTYwLTExOC0xODItOTYtMTYyLTEwLDgtNTgsNjA0LTI2LDMwLTYwLDI0LTUwLTM4LTI4LTYyWiIvPgo8L3N2Zz4=';
+
+const BLUE  = '#146EF5';
+const BLACK = '#080808';
+const WHITE = '#FFFFFF';
+const G900  = '#171717';
+const G800  = '#222222';
+const G700  = '#363636';
+const G600  = '#5A5A5A';
+const G400  = '#898989';
+
+const imgCache = {};
+function loadImg(src) {
+  if (imgCache[src]) return Promise.resolve(imgCache[src]);
+  return new Promise(r => {
+    const img = new Image();
+    img.onload  = () => { imgCache[src] = img; r(img); };
+    img.onerror = () => r(null);
+    img.src = src;
+  });
+}
+
+// Draw faint syntax-highlighted code blocks in background
+function drawCodeBg() {
+  ctx.save();
+  const mono = '"Courier New", monospace';
+  const lines = [
+    { text: 'import',        x: 60,   y: 68,  color: BLUE,  alpha: 0.18, size: 13 },
+    { text: 'webflow',       x: 117,  y: 68,  color: WHITE, alpha: 0.12, size: 13 },
+    { text: 'from',          x: 185,  y: 68,  color: BLUE,  alpha: 0.18, size: 13 },
+    { text: "'@webflow/sdk'",x: 222,  y: 68,  color: WHITE, alpha: 0.08, size: 13 },
+    { text: 'import',        x: 60,   y: 90,  color: BLUE,  alpha: 0.18, size: 13 },
+    { text: 'Anthropic',     x: 117,  y: 90,  color: WHITE, alpha: 0.12, size: 13 },
+    { text: 'from',          x: 200,  y: 90,  color: BLUE,  alpha: 0.18, size: 13 },
+    { text: "'@anthropic-ai/sdk'", x: 237, y: 90, color: WHITE, alpha: 0.08, size: 13 },
+    { text: 'const',         x: 60,   y: 124, color: BLUE,  alpha: 0.15, size: 13 },
+    { text: 'client',        x: 108,  y: 124, color: WHITE, alpha: 0.10, size: 13 },
+    { text: '=',             x: 163,  y: 124, color: G600,  alpha: 0.20, size: 13 },
+    { text: 'new Anthropic()',x: 178,  y: 124, color: WHITE, alpha: 0.08, size: 13 },
+    { text: '// publish site after AI edit', x: 60, y: 156, color: G600, alpha: 0.20, size: 12 },
+    { text: 'await',         x: 60,   y: 178, color: BLUE,  alpha: 0.15, size: 13 },
+    { text: 'webflow.sites.publishSite({ siteId })', x: 110, y: 178, color: WHITE, alpha: 0.07, size: 13 },
+
+    // Right side
+    { text: '// AI-powered layout suggestions', x: 700, y: 52,  color: G600,  alpha: 0.20, size: 12 },
+    { text: 'const',         x: 700,  y: 76,  color: BLUE,  alpha: 0.15, size: 13 },
+    { text: 'msg',           x: 748,  y: 76,  color: WHITE, alpha: 0.10, size: 13 },
+    { text: '=',             x: 780,  y: 76,  color: G600,  alpha: 0.20, size: 13 },
+    { text: 'await',         x: 795,  y: 76,  color: BLUE,  alpha: 0.15, size: 13 },
+    { text: 'client.messages.create({', x: 845, y: 76, color: WHITE, alpha: 0.07, size: 13 },
+    { text: 'model:',        x: 718,  y: 98,  color: WHITE, alpha: 0.10, size: 13 },
+    { text: '"claude-opus-4"', x: 768, y: 98, color: WHITE, alpha: 0.08, size: 13 },
+    { text: 'max_tokens:',   x: 718,  y: 120, color: WHITE, alpha: 0.10, size: 13 },
+    { text: '1024',          x: 803,  y: 120, color: BLUE,  alpha: 0.18, size: 13 },
+
+    // Bottom rows
+    { text: '✓  Build succeeded',  x: 60,  y: 560, color: WHITE, alpha: 0.15, size: 12 },
+    { text: '·  2.3s',             x: 200, y: 560, color: G600,  alpha: 0.20, size: 12 },
+    { text: 'npm run deploy',       x: 60,  y: 582, color: WHITE, alpha: 0.10, size: 12 },
+    { text: '→ 200 OK',            x: 700, y: 560, color: WHITE, alpha: 0.12, size: 12 },
+    { text: 'webflow.com/api/v2',   x: 820, y: 560, color: G600,  alpha: 0.15, size: 12 },
+    { text: 'git push origin main', x: 700, y: 582, color: WHITE, alpha: 0.10, size: 12 },
+  ];
+
+  lines.forEach(({ text, x, y, color, alpha, size }) => {
+    ctx.font = `${size}px ${mono}`;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fillText(text, x, y);
+  });
+  ctx.restore();
+}
+
+// Terminal window chrome
+function drawTerminal(x, y, w, h) {
+  ctx.save();
+  // Panel bg
+  ctx.fillStyle = G900;
+  ctx.strokeStyle = G700;
+  ctx.lineWidth = 1;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+  // Title bar
+  const barH = 32;
+  ctx.fillStyle = G800;
+  ctx.fillRect(x, y, w, barH);
+  // Bottom border of bar
+  ctx.strokeStyle = G700;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y + barH);
+  ctx.lineTo(x + w, y + barH);
+  ctx.stroke();
+
+  // Dots
+  const dotY = y + barH / 2;
+  const dotR = 5;
+  const dots = [x + 18, x + 36, x + 54];
+  dots.forEach(dx => {
+    ctx.beginPath();
+    ctx.arc(dx, dotY, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = G600;
+    ctx.fill();
+  });
+
+  // Filename
+  ctx.font = '12px "Courier New", monospace';
+  ctx.fillStyle = G400;
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  ctx.fillText('integration.js', x + w / 2, y + barH / 2 + 4);
+  ctx.textAlign = 'left';
+  ctx.restore();
+}
+
+function drawVignette() {
+  const g = ctx.createRadialGradient(W/2, H/2, 80, W/2, H/2, W * 0.7);
+  g.addColorStop(0,   'rgba(0,0,0,0)');
+  g.addColorStop(0.7, 'rgba(0,0,0,0)');
+  g.addColorStop(1,   'rgba(0,0,0,0.55)');
+  ctx.save();
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+// Subtle dot grid
+function drawGrid() {
+  ctx.save();
+  ctx.fillStyle = WHITE;
+  ctx.globalAlpha = 0.025;
+  const sp = 36;
+  for (let x = sp; x < W; x += sp)
+    for (let y = sp; y < H; y += sp) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  ctx.restore();
+}
+
+async function draw() {
+  // Background
+  ctx.fillStyle = BLACK;
+  ctx.fillRect(0, 0, W, H);
+
+  drawGrid();
+  drawCodeBg();
+
+  // Terminal window — center region
+  const panW = 560, panH = 280;
+  const panX = (W - panW) / 2;
+  const panY = (H - panH) / 2 - 20;
+  drawTerminal(panX, panY, panW, panH);
+
+  // Load logos
+  const wfImg    = await loadImg('webflow-brand/logos/Mark_Logo_Blue.png');
+  const sparkImg = await loadImg(SPARK);
+
+  // Logo positions inside panel
+  const barH = 32;
+  const innerY = panY + barH + (panH - barH) / 2; // vertical center of panel body
+  const SIZE = 120;
+  const SPREAD = 110;
+  const MID_X = W / 2;
+
+  function stamp(img, cx, cy) {
+    if (!img) return;
+    const s  = Math.min(SIZE / img.naturalWidth, SIZE / img.naturalHeight);
+    const lw = img.naturalWidth  * s;
+    const lh = img.naturalHeight * s;
+    ctx.drawImage(img, cx - lw/2, cy - lh/2, lw, lh);
+  }
+
+  if (wfImg)    stamp(wfImg,    MID_X - SPREAD, innerY);
+  if (sparkImg) stamp(sparkImg, MID_X + SPREAD, innerY);
+
+  // + operator
+  ctx.save();
+  ctx.font = `300 28px 'WF Visual Sans', 'Poppins', sans-serif`;
+  ctx.fillStyle = G600;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('+', MID_X, innerY);
+  ctx.restore();
+
+  drawVignette();
+
+  // Headline — below terminal, monospace flavor via font weight + spacing
+  ctx.save();
+  ctx.font = `600 52px 'WF Visual Sans', 'Poppins', sans-serif`;
+  ctx.fillStyle = WHITE;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const headlineY = panY + panH + 32;
+  ctx.fillText('Build smarter. Ship faster.', MID_X, headlineY);
+
+  // Subline — monospace URL-style
+  ctx.font = `13px 'Courier New', monospace`;
+  ctx.fillStyle = G400;
+  ctx.textBaseline = 'top';
+  ctx.fillText('webflow.com/integrations/claude', MID_X, headlineY + 66);
+  ctx.restore();
+}
+
+(async () => {
+  await loadFonts();
+  draw();
+})();
+
+document.getElementById('dl').addEventListener('click', () => {
+  canvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'webflow-claude-og.png';
+    a.click();
+  }, 'image/png');
+});
+</script>
+</body>
+</html>

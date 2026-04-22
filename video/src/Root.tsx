@@ -10,7 +10,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="DevPlatform"
           component={DevPlatform}
-          durationInFrames={55 * 30}
+          durationInFrames={91 * 30}
           fps={30}
           width={1920}
           height={1080}
